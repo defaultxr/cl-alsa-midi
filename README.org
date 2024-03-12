@@ -1,0 +1,63 @@
+#+TITLE: cl-alsa-midi
+
+This is cl-alsa-midi, a Common Lisp library for MIDI in Linux via ALSA. With it, you can send and receive MIDI messages to and from any program or device that is supported by ALSA.
+
+Currently, this library is in the process of being refactored:
+
+- Remove extraneous/unneeded features.
+- Reduce dependencies.
+- Improve/clean up the code style (remove unnecessary macros, fix indentation, etc).
+- Add more docstrings/documentation.
+- Simplify and stabilize the API.
+- Add more tests.
+- Submit to Quicklisp (after most of the above is complete--in particular, API improvement/stabilization).
+
+This library is based off of [[https://github.com/defaultxr/cl-alsaseq][cl-alsaseq]], originally written by Richard Venn. It cleans up the library, removing the sequencer functionality and other non-essential parts, and simplifying the interface.
+
+* Example
+
+Here is a simple example of how to use cl-alsa-midi.
+
+Note that in the future cl-alsa-midi's API will change and this example will stop working. If you just need a stable API that you can rely on, you should use [[https://github.com/defaultxr/cl-alsaseq][cl-alsaseq]] for now instead.
+
+#+BEGIN_SRC lisp
+  (ql:quickload :cl-alsa-midi) ; Load the system.
+
+  ;; Define a basic handler function for MIDI input.
+  (defun midi-map (messages)
+    (dolist (message messages)
+      (let* ((event-type (getf message :event-type))
+             (event-data (getf message :event-data))
+             (source (car (getf message :source)))
+             (destination (car (getf message :dest))))
+        (declare (ignorable source destination))
+        (format t "~A: ~S~%"
+                (case event-type
+                  (:snd_seq_event_noteon "Note on")
+                  (:snd_seq_event_noteoff "Note off")
+                  (:snd_seq_event_controller "CC")
+                  (t event-type))
+                event-data))))
+
+  ;; Start the ALSA MIDI client with midi-map function as input handler.
+  (midihelper:start-midihelper :master 96 'midi-map)
+
+  ;; ...Then connect the "CL" ALSA MIDI source to the destination of your choice.
+  ;; I usually use Qjackctl to manage MIDI connections.
+
+  (defparameter *midi-channel* 0)
+
+  (midihelper:send-event (midihelper:ev-noteon *midi-channel* 69 127)) ; Send a MIDI note on event. 69 is the note number, 127 is the velocity
+
+  (midihelper:send-event (midihelper:ev-noteoff *midi-channel* 69 127)) ; Send a MIDI note off to stop the previous note.
+
+  (midihelper:send-event (midihelper:ev-pgmchange *midi-channel* 2)) ; Send a program change message to switch to program #2.
+#+END_SRC
+
+* Similar
+
+** [[https://github.com/defaultxr/cl-alsaseq][cl-alsaseq]]
+The original library that cl-alsa-midi is based off of.
+
+** [[https://github.com/chfin/cl-portmidi][cl-portmidi]]
+Portmidi bindings for Common Lisp.
