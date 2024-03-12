@@ -38,10 +38,9 @@
            #:*reader-ichan*
            #:*reader-ochan*
            #:set-master-bpm
-           #:inspect-midihelper
-           #:start-midihelper
-           #:stop-midihelper
-           #:check-midihelper
+           #:midihelper-threads
+           #:midihelper-start
+           #:midihelper-stop
            #:if-gesture
            #:if-clock
            #:macromatch

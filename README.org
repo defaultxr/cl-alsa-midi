@@ -40,7 +40,7 @@ Note that in the future cl-alsa-midi's API will change and this example will sto
                 event-data))))
 
   ;; Start the ALSA MIDI client with midi-map function as input handler.
-  (midihelper:start-midihelper :master 96 'midi-map)
+  (midihelper:midihelper-start :master 96 'midi-map)
 
   ;; ...Then connect the "CL" ALSA MIDI source to the destination of your choice.
   ;; I usually use Qjackctl to manage MIDI connections.
