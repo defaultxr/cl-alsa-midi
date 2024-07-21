@@ -39,7 +39,8 @@
                #:mutility/test-helpers)
   :pathname "t/"
   :serial t
-  :components ((:file "test"))
+  :components ((:file "test")
+               (:file "midi"))
   :perform (test-op (op c)
                     (uiop:symbol-call :fiveam :run!
                                       (uiop:find-symbol* '#:cl-alsa-midi-tests
