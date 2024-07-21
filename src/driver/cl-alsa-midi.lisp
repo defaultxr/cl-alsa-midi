@@ -157,7 +157,7 @@
     (snd_seq_drain_output *seq)))
 
 (defun event-type-assert (type type-min type-max)
-  "Check that TYPE is a valid event type keyword."
+  "Check that TYPE is a valid event type keyword whose enum value is TYPE-MIN or above, and below TYPE-MAX."
   (let ((type-value (ev-key-int type)))
     (assert (and (>= type-value (ev-key-int type-min))
                  (< type-value (ev-key-int type-max))))))
@@ -174,7 +174,8 @@
   (with-midi-ctrl-event (event ctrl-type channel param value)
     (send-midi *seq my-port event)))
 
-(defun send-queue-ctrl (queue queue-ctrl-type *seq my-port) ; FIX: document?
+(defun send-queue-ctrl (queue queue-ctrl-type *seq my-port)
+  "Send a MIDI queue control event."
   (event-type-assert queue-ctrl-type :SND_SEQ_EVENT_START :SND_SEQ_EVENT_TUNE_REQUEST)
   (with-midi-queue-event (event queue-ctrl-type queue (null-pointer) (null-pointer))
     (send-midi *seq my-port event)))

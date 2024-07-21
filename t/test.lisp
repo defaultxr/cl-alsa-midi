@@ -36,10 +36,10 @@
       "Check for any undocumented exported symbols"
       (let ((undocumented (package-undocumented-symbols '#:cl-alsa-midi)))
         (is-false undocumented
-                  "some exported symbols do not have docstrings: ~S" undocumented)))
+                  "Some exported symbols do not have docstrings: ~S" undocumented)))
 
 (test docstrings-broken-links
       "Check for any broken links in docstrings of exported symbols"
       (let ((symbols (package-docstrings-with-broken-links '#:cl-alsa-midi)))
         (is-false symbols
-                  "some exported symbols have docstrings that contain broken links: ~S" symbols)))
+                  "Some exported symbols have docstrings that contain broken links: ~S" symbols)))
