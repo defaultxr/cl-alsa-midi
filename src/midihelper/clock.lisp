@@ -38,16 +38,16 @@
     (let ((intvl (/ (- next last) 1000 )))
       (setf last next)
       (setf next (get-internal-real-time))
-      (if (> intvl 1/8);; 1/8 second => 20bpm - lower limit
-          0.005 ;;0.005 ms per tick => 500bpm - upper limit
+      (if (> intvl 1/8) ; 1/8 second => 20bpm - lower limit
+          0.005 ; 0.005 ms per tick => 500bpm - upper limit
           intvl)))
 
   (defun set-songpos (ticks)
-    "Set song position, specified in 1/4 beats (same units as songpos pointer)"
+    "Set song position specified in 1/4 beats (same units as songpos pointer)."
     (setf songpos (* ticks 24)))
 
   (defun get-songpos ()
-    "Get song position, in semiquavers"
+    "Get song position in semiquavers."
     (/ songpos 24))
 
   (defun stopped-handler (tick-chan ctrl-chan)
@@ -66,7 +66,7 @@
        )))
 
   (defun ticker (tick-chan ctrl-chan master-slave ppqn)
-    "optional master clock"
+    "Optional master clock."
     (multiple-value-bind (semiquavers rem)
         (floor songpos 24)
       ;; (assert (= 0 rem))
@@ -84,10 +84,10 @@
                  (match ctrl
                    ((property :EVENT-TYPE :SND_SEQ_EVENT_STOP)
                     (setf ticker-state :stopped))))
-                (otherwise
-                 (match ppqn
-                   (24 (lores-semiquaver tick-chan *tick-time*))
-                   (96 (hires-semiquaver tick-chan *tick-time*))))))
+         (otherwise
+          (match ppqn
+            (24 (lores-semiquaver tick-chan *tick-time*))
+            (96 (hires-semiquaver tick-chan *tick-time*))))))
       ((list :running :slave)
        (match (? ctrl-chan)
          ((property :EVENT-TYPE :SND_SEQ_EVENT_STOP)
@@ -108,25 +108,24 @@
         (end-time)
         (reps (* ppqn 5)))
     (setf start-time (get-internal-real-time))
-    (loop repeat reps do
+    (loop :repeat reps :do
       (? clock-chan 0.1))
     (setf end-time (get-internal-real-time))
-    (format t "counted ~A ticks in ~A ms. (~F bpm)~%~%"
+    (format t "Counted ~A ticks in ~A ms. (~F bpm)~%~%"
             reps
             (- end-time start-time)
             (/ (* reps 60 1000)
                (* ppqn (- end-time start-time))))))
 
 (defun start-clock (ctrl-chan master-slave ppqn)
-  (assert (null *clock-thread*))
-  (setf *clock-thread*
-        (bt:make-thread
-         (lambda ()
-           (loop
-             (restart-case
-                 (ticker *clock-ochan* ctrl-chan master-slave ppqn)
-               (carry-on-ticking ()))))
-         :name "cl-alsa-midi midihelper clock")))
+  (check-type *clock-thread* null)
+  (setf *clock-thread* (bt:make-thread
+                        (lambda ()
+                          (loop
+                            (restart-case
+                                (ticker *clock-ochan* ctrl-chan master-slave ppqn)
+                              (carry-on-ticking ()))))
+                        :name "cl-alsa-midi midihelper clock")))
 
 (defun stop-clock ()
   (bt:destroy-thread *clock-thread*)
@@ -145,14 +144,12 @@
         :EVENT-DATA `(PARAM 0 VALUE ,program CHANNEL ,channel)))
 
 (defun ev-tick (&optional songpos)
-  `(:EVENT-TYPE :SND_SEQ_EVENT_CLOCK ,@(if songpos
-                                           (list :songpos
-                                                 songpos))))
+  `(:EVENT-TYPE :SND_SEQ_EVENT_CLOCK ,@(when songpos
+                                         (list :songpos songpos))))
 
 (defun ev-microtick (&optional songpos)
-  `(:EVENT-TYPE :MICROTICK ,@(if songpos
-                                 (list :songpos
-                                       songpos))))
+  `(:EVENT-TYPE :MICROTICK ,@(when songpos
+                               (list :songpos songpos))))
 
 (defun ev-start ()
   '(:EVENT-TYPE :SND_SEQ_EVENT_START))

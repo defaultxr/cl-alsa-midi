@@ -16,26 +16,24 @@
   (setf seq nil))
 
 (defun open-port (name seq &optional (direction :duplex))
-  "create a new port on the alsa sequencer object <seq> named <name>"
+  "Create a new port on the ALSA sequencer object SEQ named NAME."
   (snd_seq_create_simple_port seq name
-                              (apply #'logior
-                                     (append
-                                      (match direction
-                                        ((or :duplex :input)
-                                         (list SND_SEQ_PORT_CAP_WRITE
-                                               SND_SEQ_PORT_CAP_SUBS_WRITE)))
-                                      (match direction
-                                        ((or :duplex :output)
-                                         (list SND_SEQ_PORT_CAP_READ
-                                               SND_SEQ_PORT_CAP_SUBS_READ)))))
+                              (apply #'logior (append (match direction
+                                                        ((or :duplex :input)
+                                                         (list SND_SEQ_PORT_CAP_WRITE
+                                                               SND_SEQ_PORT_CAP_SUBS_WRITE)))
+                                                      (match direction
+                                                        ((or :duplex :output)
+                                                         (list SND_SEQ_PORT_CAP_READ
+                                                               SND_SEQ_PORT_CAP_SUBS_READ)))))
                               (logior SND_SEQ_PORT_TYPE_MIDI_GENERIC
                                       SND_SEQ_PORT_TYPE_APPLICATION)))
 (defun close-port (seq port)
-  "close port <port> on alsa sequencer object <seq>"
+  "Close port PORT on ALSA sequencer object SEQ."
   (snd_seq_delete_simple_port seq port))
 
 (defmacro! with-seq ((seq &key (name "Common Lisp")) &body body)
-  "open an alsa sequencer connection <seq>, named <name> with lexical scope in <body>"
+  "Open an ALSA sequencer connection SEQ named NAME with lexical scope in BODY."
   `(let* ((,g!seq (open-seq ,name))
           (,seq (mem-ref ,g!seq :pointer)))
      (unwind-protect
@@ -43,46 +41,38 @@
        (close-seq ,g!seq))))
 
 (defun ev-key-int (key)
-  "convert alsa event-type keyword to cffi int"
+  "Convert an ALSA event-type keyword to a CFFI int."
   (foreign-enum-value 'snd_seq_event_type key))
 
 (defun ev-int-key (int)
-  "convert alsa event-type cffi int to keyword"
+  "Convert a CFFI int to an ALSA event-type keyword."
   (foreign-enum-keyword 'snd_seq_event_type int))
 
 (defun cond-lookup-test (event-type-key)
-  "Helper function for debugging cond-lookup macro e.g
-(cond-lookup-test :snd_seq_event_noteon)"
+  "Helper function for debugging cond-lookup macro, i.e. (cond-lookup-test :snd_seq_event_noteon)."
   (let ((event-type (ev-key-int event-type-key)))
     (cond-lookup)))
 
 (defun midi-data (*data event-type)
-  "Mapping event-type and data pointer to lisp-readable midi data"
+  "Mapping event-type and data pointer to lisp-readable MIDI data."
   (let ((type (cond-lookup)))
     (if type
         (cffi:mem-ref *data type)
-        (warn "Received unknown data of type ~A"
-              (ev-int-key type)))))
+        (warn "Received unknown data of type ~A" (ev-int-key type)))))
 
 (defun describe-event (event)
   "Get a plist representation of a raw CFFI MIDI event."
   (with-foreign-slots ((type (:pointer data) queue (:pointer source) (:pointer dest)) event (:struct snd_seq_event_t))
-    (list ;; :pointer event
-     :event-type
-     (ev-int-key type)
-     :event-data
-     (midi-data data type)
-     :source
-     (list ;; source
-      (mem-ref source '(:struct snd_seq_addr_t)))
-     :dest
-     (list ;; dest
-      (mem-ref dest '(:struct snd_seq_addr_t))))))
+    (list ; :pointer event
+     :event-type (ev-int-key type)
+     :event-data (midi-data data type)
+     :source (list (mem-ref source '(:struct snd_seq_addr_t)))
+     :dest (list (mem-ref dest '(:struct snd_seq_addr_t))))))
 
 (defcvar "errno" :int)
 
 (defun recv (*seq)
-  "poll the alsa midi port at *seq and my-port, block until there is a midi event to read, then return that event"
+  "Poll the ALSA MIDI port at *SEQ and my-port; block until there is a MIDI event to read, then return that event."
   (cffi:with-foreign-object (*event '(:struct snd_seq_event_t))
     (snd_seq_event_input *seq *event)
     (describe-event (mem-ref *event :pointer))))
@@ -98,18 +88,16 @@
 ;; (defcvar "errno" :int)
 
 (defun set-addr-slots (addr *port *client)
-  (with-foreign-slots (((:pointer port) (:pointer client))
-                       addr (:struct snd_seq_addr_t))
+  (with-foreign-slots (((:pointer port) (:pointer client)) addr (:struct snd_seq_addr_t))
     (setf (mem-ref port :uchar) *port)
-    (setf (mem-ref client :uchar) *client )))
+    (setf (mem-ref client :uchar) *client)))
 
 (defmacro with-midi-event ((var data type &key (queue snd_seq_queue_direct) (flags 0)) &body body)
   `(let ((,var (convert-to-foreign (list 'type ,type
                                          'queue ,queue
                                          'flags ,flags)
                                    '(:struct snd_seq_event_t))))
-     (with-foreign-slots (((:pointer data))
-                          ,var (:struct snd_seq_event_t))
+     (with-foreign-slots (((:pointer data)) ,var (:struct snd_seq_event_t))
        (let ((,data data))
          ,@body))))
 
@@ -162,8 +150,7 @@
      ,@body))
 
 (defun send-midi (*seq my-port event)
-  (with-foreign-slots (((:pointer source) (:pointer dest))
-                       event (:struct snd_seq_event_t))
+  (with-foreign-slots (((:pointer source) (:pointer dest)) event (:struct snd_seq_event_t))
     (set-addr-slots source my-port 0)
     (set-addr-slots dest SND_SEQ_ADDRESS_UNKNOWN SND_SEQ_ADDRESS_SUBSCRIBERS)
     (snd_seq_event_output *seq event)
