@@ -17,10 +17,7 @@
            #:send-ctrl
            #:send-note
            #:recv
-           #:velocity
-           #:note
-           #:channel
-           #:param))
+           #:channel))
 
 (defpackage #:cl-alsa-midi.quick
   (:use #:cl #:cl-alsa-midi)
