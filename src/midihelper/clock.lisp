@@ -1,4 +1,4 @@
-(in-package :midihelper)
+(in-package :cl-alsa-midi/midihelper)
 
 (defvar *clock-ctrl-chan* (make-nonblock-buf-channel))
 
@@ -126,7 +126,7 @@
              (restart-case
                  (ticker *clock-ochan* ctrl-chan master-slave ppqn)
                (carry-on-ticking ()))))
-         :name "midihelper clock")))
+         :name "cl-alsa-midi midihelper clock")))
 
 (defun stop-clock ()
   (bt:destroy-thread *clock-thread*)

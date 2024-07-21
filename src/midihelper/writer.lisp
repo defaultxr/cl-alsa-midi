@@ -1,4 +1,4 @@
-(in-package :midihelper)
+(in-package :cl-alsa-midi/midihelper)
 
 (defvar *seq* nil);;sequence struct
 (defvar **seq nil);;pointer to sequence struct (for memory deallocation)
@@ -83,7 +83,7 @@
                                 (carry-on-writing ()))))
                         (stop-thread ()))))
                (setf *writer-thread* nil))))
-         :name "midihelper writer")))
+         :name "cl-alsa-midi midihelper writer")))
 
 (defun stop-writer-thread ()
   (bt:interrupt-thread

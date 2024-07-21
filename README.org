@@ -40,18 +40,18 @@ Note that in the future cl-alsa-midi's API will change and this example will sto
                 event-data))))
 
   ;; Start the ALSA MIDI client with midi-map function as input handler.
-  (midihelper:midihelper-start :master 96 'midi-map)
+  (cl-alsa-midi/midihelper:midihelper-start :master 96 'midi-map)
 
   ;; ...Then connect the "CL" ALSA MIDI source to the destination of your choice.
   ;; I usually use Qjackctl to manage MIDI connections.
 
   (defparameter *midi-channel* 0)
 
-  (midihelper:send-event (midihelper:ev-noteon *midi-channel* 69 127)) ; Send a MIDI note on event. 69 is the note number, 127 is the velocity
+  (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-noteon *midi-channel* 69 127)) ; Send a MIDI note on event. 69 is the note number, 127 is the velocity
 
-  (midihelper:send-event (midihelper:ev-noteoff *midi-channel* 69 127)) ; Send a MIDI note off to stop the previous note.
+  (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-noteoff *midi-channel* 69 127)) ; Send a MIDI note off to stop the previous note.
 
-  (midihelper:send-event (midihelper:ev-pgmchange *midi-channel* 2)) ; Send a program change message to switch to program #2.
+  (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-pgmchange *midi-channel* 2)) ; Send a program change message to switch to program #2.
 #+END_SRC
 
 * Similar

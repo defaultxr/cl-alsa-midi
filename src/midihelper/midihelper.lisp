@@ -1,4 +1,4 @@
-(in-package :midihelper)
+(in-package :cl-alsa-midi/midihelper)
 
 (defun midihelper-threads ()
   "Get a plist of the current midihelper clock, reader, and writer threads."

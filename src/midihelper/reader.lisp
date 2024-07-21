@@ -1,4 +1,4 @@
-(in-package :midihelper)
+(in-package :cl-alsa-midi/midihelper)
 
 (defun make-nonblock-buf-channel (&optional (queue 100))
   (make-instance 'calispel:channel

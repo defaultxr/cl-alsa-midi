@@ -31,7 +31,7 @@
            #:send-pitchbend
            #:send-control))
 
-(defpackage #:midihelper
+(defpackage #:cl-alsa-midi/midihelper
   (:use #:cl #:cffi #:cl-alsa-midi #:optima #:optima.extra #:calispel)
   (:export #:*clock-ochan*
            #:*clock-ctrl-chan*
