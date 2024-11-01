@@ -132,6 +132,17 @@
        (unless reader-thread
          (cl-alsa-midi/midihelper:midihelper-stop)))))
 
+(test with-aseqdump
+  "Sanity check for with-aseqdump"
+  (with-aseqdump
+    (let ((threads (cl-alsa-midi/midihelper:midihelper-threads)))
+      (is-true (getf threads :clock)
+               "midihelper clock thread not running")
+      (is-true (getf threads :reader)
+               "midihelper reade thread not running")
+      (is-true (getf threads :writer)
+               "midihelper writer thread not running"))))
+
 (test midihelper-send-event
   "Test sending events with the midihelper subsystem"
   (let ((results (with-aseqdump
