@@ -15,11 +15,11 @@
       (next (get-internal-real-time)))
 
   (defun hires-tick (tick-chan microtick-intvl)
-    (! tick-chan (ev-tick songpos))
+    (calispel:! tick-chan (ev-tick songpos))
     (incf songpos)
     (sleep microtick-intvl)
     (dotimes (n 3)
-      (! tick-chan (ev-microtick songpos))
+      (calispel:! tick-chan (ev-microtick songpos))
       (incf songpos)
       (sleep microtick-intvl)))
 
@@ -29,7 +29,7 @@
 
   (defun lores-semiquaver (tick-chan tick-intvl)
     (dotimes (n 6)
-      (! tick-chan (ev-tick songpos))
+      (calispel:! tick-chan (ev-tick songpos))
       (incf songpos 4)
       (sleep tick-intvl)))
 
@@ -51,15 +51,15 @@
     (/ songpos 24))
 
   (defun stopped-handler (tick-chan ctrl-chan)
-    (match (? ctrl-chan)
+    (optima:match (calispel:? ctrl-chan)
       ((property :event-type :snd_seq_event_continue)
-       (! tick-chan (ev-songpos songpos))
-       (! tick-chan (ev-continue))
+       (calispel:! tick-chan (ev-songpos songpos))
+       (calispel:! tick-chan (ev-continue))
        (setf ticker-state :running))
       ((property :event-type :snd_seq_event_start)
        (setf songpos 0)
-       (! tick-chan (ev-songpos songpos))
-       (! tick-chan (ev-start))
+       (calispel:! tick-chan (ev-songpos songpos))
+       (calispel:! tick-chan (ev-start))
        (setf ticker-state :running))
       ((property :EVENT-TYPE :SND_SEQ_EVENT_CLOCK)
        ;; (warn "received clock signal before control signal whilst in stopped state, ignoring")
@@ -76,25 +76,25 @@
       ;; (if (= 0 rem)
       ;;     (print semiquavers))
       )
-    (match (list ticker-state master-slave)
+    (optima:match (list ticker-state master-slave)
       ((list :stopped _)
        (stopped-handler tick-chan ctrl-chan))
       ((list :running :master)
-       (pri-alt ((? ctrl-chan ctrl)
-                 (match ctrl
-                   ((property :EVENT-TYPE :SND_SEQ_EVENT_STOP)
-                    (setf ticker-state :stopped))))
+       (calispel:pri-alt ((calispel:? ctrl-chan ctrl)
+                          (optima:match ctrl
+                            ((property :EVENT-TYPE :SND_SEQ_EVENT_STOP)
+                             (setf ticker-state :stopped))))
          (otherwise
-          (match ppqn
+          (optima:match ppqn
             (24 (lores-semiquaver tick-chan *tick-time*))
             (96 (hires-semiquaver tick-chan *tick-time*))))))
       ((list :running :slave)
-       (match (? ctrl-chan)
+       (optima:match (calispel:? ctrl-chan)
          ((property :EVENT-TYPE :SND_SEQ_EVENT_STOP)
           (setf ticker-state :stopped))
          ((property :EVENT-TYPE :SND_SEQ_EVENT_CLOCK)
-          (match ppqn
-            (24 (! tick-chan (ev-tick songpos))
+          (optima:match ppqn
+            (24 (calispel:! tick-chan (ev-tick songpos))
                 (incf songpos 4))
             (96 (hires-tick tick-chan (/ (measure-tick-time) 24))))))))))
 
@@ -103,13 +103,13 @@
 (defun bpm-test (&optional (ppqn 96) (clock-chan *clock-ochan*))
   ;; (drain-channel clock-chan)
   ;; clear buffer of stale ticks
-  (? clock-chan)
+  (calispel:? clock-chan)
   (let ((start-time)
         (end-time)
         (reps (* ppqn 5)))
     (setf start-time (get-internal-real-time))
     (loop :repeat reps :do
-      (? clock-chan 0.1))
+      (calispel:? clock-chan 0.1))
     (setf end-time (get-internal-real-time))
     (format t "Counted ~A ticks in ~A ms. (~F bpm)~%~%"
             reps

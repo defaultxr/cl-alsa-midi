@@ -5,27 +5,27 @@
 (defvar *my-ports* nil)
 
 (defun %send-event (description &optional (port (car *my-ports*)) (seq *seq*))
-  (match description
-    ((plist :EVENT-TYPE (guard event-type (or (equal event-type :snd_seq_event_noteoff)
-                                              (equal event-type :snd_seq_event_noteon)))
-            :EVENT-DATA (plist ; DURATION duration OFF_VELOCITY off_velocity
-                         VELOCITY velocity NOTE note CHANNEL channel))
+  (optima:match description
+    ((optima.extra:plist :EVENT-TYPE (optima:guard event-type (or (equal event-type :snd_seq_event_noteoff)
+                                                                  (equal event-type :snd_seq_event_noteon)))
+                         :EVENT-DATA (optima.extra:plist ; DURATION duration OFF_VELOCITY off_velocity
+                                      VELOCITY velocity NOTE note CHANNEL channel))
      (send-note velocity note channel event-type seq port))
-    ((plist :EVENT-TYPE (guard event-type (or (equal event-type :snd_seq_event_sysex)
-                                              (equal event-type :snd_seq_event_controller)
-                                              (equal event-type :snd_seq_event_songpos)
-                                              (equal event-type :snd_seq_event_pgmchange)
-                                              (equal event-type :snd_seq_event_chanpress)
-                                              (equal event-type :snd_seq_event_pitchbend)
-                                              (equal event-type :snd_seq_event_control14)
-                                              (equal event-type :snd_seq_event_nonregparam)
-                                              (equal event-type :snd_seq_event_regparam)))
-            :EVENT-DATA (plist VALUE value PARAM param CHANNEL channel))
+    ((optima.extra:plist :EVENT-TYPE (optima:guard event-type (or (equal event-type :snd_seq_event_sysex)
+                                                                  (equal event-type :snd_seq_event_controller)
+                                                                  (equal event-type :snd_seq_event_songpos)
+                                                                  (equal event-type :snd_seq_event_pgmchange)
+                                                                  (equal event-type :snd_seq_event_chanpress)
+                                                                  (equal event-type :snd_seq_event_pitchbend)
+                                                                  (equal event-type :snd_seq_event_control14)
+                                                                  (equal event-type :snd_seq_event_nonregparam)
+                                                                  (equal event-type :snd_seq_event_regparam)))
+                         :EVENT-DATA (optima.extra:plist VALUE value PARAM param CHANNEL channel))
      (send-ctrl channel param value event-type seq port))
-    ((plist :EVENT-TYPE (guard event-type (or (equal event-type :snd_seq_event_clock)
-                                              (equal event-type :snd_seq_event_start)
-                                              (equal event-type :snd_seq_event_stop)
-                                              (equal event-type :snd_seq_event_continue))))
+    ((optima.extra:plist :EVENT-TYPE (optima:guard event-type (or (equal event-type :snd_seq_event_clock)
+                                                                  (equal event-type :snd_seq_event_start)
+                                                                  (equal event-type :snd_seq_event_stop)
+                                                                  (equal event-type :snd_seq_event_continue))))
      (send-queue-ctrl 0 event-type seq port))
     (_ (format t "Unknown event ~S~%" description))))
 
@@ -58,7 +58,7 @@
                                                  (let ((port (open-port "port0" thread-seq :output)))
                                                    (handler-case
                                                        (loop
-                                                         (let ((message (? *writer-ichan*)))
+                                                         (let ((message (calispel:? *writer-ichan*)))
                                                            (restart-case
                                                                (%send-event message
                                                                             port
@@ -73,4 +73,4 @@
                                          (error 'stop-thread))))
 
 (defun send-event (event)
-  (! *writer-ichan* event))
+  (calispel:! *writer-ichan* event))

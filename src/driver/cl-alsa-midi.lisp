@@ -18,11 +18,11 @@
 (defun open-port (name seq &optional (direction :duplex))
   "Create a new port on the ALSA sequencer object SEQ named NAME."
   (snd_seq_create_simple_port seq name
-                              (apply #'logior (append (match direction
+                              (apply #'logior (append (optima:match direction
                                                         ((or :duplex :input)
                                                          (list SND_SEQ_PORT_CAP_WRITE
                                                                SND_SEQ_PORT_CAP_SUBS_WRITE)))
-                                                      (match direction
+                                                      (optima:match direction
                                                         ((or :duplex :output)
                                                          (list SND_SEQ_PORT_CAP_READ
                                                                SND_SEQ_PORT_CAP_SUBS_READ)))))

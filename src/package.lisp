@@ -1,7 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:cl-alsa-midi
-  (:use #:cl #:cffi #:calispel #:optima #:optima.extra)
+  (:use #:cl #:cffi)
   (:import-from #:let-over-lambda
                 #:g!-symbol-p
                 #:defmacro/g!
@@ -29,7 +29,7 @@
            #:send-control))
 
 (defpackage #:cl-alsa-midi/midihelper
-  (:use #:cl #:cffi #:cl-alsa-midi #:optima #:optima.extra #:calispel)
+  (:use #:cl #:cffi #:cl-alsa-midi)
   (:export #:*clock-ochan*
            #:*clock-ctrl-chan*
            #:*reader-ichan*

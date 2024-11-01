@@ -7,8 +7,8 @@
                           :CAPACITY queue)))
 
 (defun drain-channel (chan)
-  (loop (pri-alt ((? chan res)
-                  (print res))
+  (loop (calispel:pri-alt ((calispel:? chan res)
+                           (print res))
           (otherwise
            (return-from drain-channel)))))
 
@@ -18,27 +18,27 @@
 (defvar *reader-ochan* (make-nonblock-buf-channel))
 
 (defmacro if-gesture (&body body)
-  `((plist :EVENT-TYPE (guard event-type (or (equal event-type :snd_seq_event_noteoff)
-                                             (equal event-type :snd_seq_event_noteon)
-                                             (equal event-type :snd_seq_event_controller)
-                                             (equal event-type :snd_seq_event_pgmchange)
-                                             (equal event-type :snd_seq_event_chanpress)
-                                             (equal event-type :snd_seq_event_pitchbend)
-                                             (equal event-type :snd_seq_event_control14)
-                                             (equal event-type :snd_seq_event_nonregparam)
-                                             (equal event-type :snd_seq_event_regparam))))
+  `((optima.extra:plist :EVENT-TYPE (optima:guard event-type (or (equal event-type :snd_seq_event_noteoff)
+                                                                 (equal event-type :snd_seq_event_noteon)
+                                                                 (equal event-type :snd_seq_event_controller)
+                                                                 (equal event-type :snd_seq_event_pgmchange)
+                                                                 (equal event-type :snd_seq_event_chanpress)
+                                                                 (equal event-type :snd_seq_event_pitchbend)
+                                                                 (equal event-type :snd_seq_event_control14)
+                                                                 (equal event-type :snd_seq_event_nonregparam)
+                                                                 (equal event-type :snd_seq_event_regparam))))
     ,@body))
 
 (defmacro if-clock (&body body)
-  `((plist :EVENT-TYPE (guard event-type (or (equal event-type :snd_seq_event_clock)
-                                             (equal event-type :snd_seq_event_start)
-                                             (equal event-type :snd_seq_event_stop)
-                                             (equal event-type :snd_seq_event_continue)
-                                             (equal event-type :snd_seq_event_songpos))))
+  `((optima.extra:plist :EVENT-TYPE (optima:guard event-type (or (equal event-type :snd_seq_event_clock)
+                                                                 (equal event-type :snd_seq_event_start)
+                                                                 (equal event-type :snd_seq_event_stop)
+                                                                 (equal event-type :snd_seq_event_continue)
+                                                                 (equal event-type :snd_seq_event_songpos))))
     ,@body))
 
 (defmacro macromatch (arg &body clauses)
-  `(match ,arg
+  `(optima:match ,arg
      ,@(mapcar #'macroexpand
                clauses)))
 
@@ -48,11 +48,11 @@
       (if-gesture
         (mapcar
          (lambda (mapped-mess)
-           (! reader-ochan mapped-mess))
+           (calispel:! reader-ochan mapped-mess))
          (funcall reader-map
                   (list mess))))
       (if-clock
-        (! clock-ichan mess)))))
+        (calispel:! clock-ichan mess)))))
 
 (defvar *reader-thread* nil)
 
