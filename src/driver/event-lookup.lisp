@@ -1,4 +1,5 @@
 (in-package :cl-alsa-midi)
+
 (defmacro lookup-table ()
   `(list :SND_SEQ_EVENT_SYSTEM nil
          :SND_SEQ_EVENT_NOTE '(:struct snd_seq_ev_note_t)

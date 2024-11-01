@@ -6,14 +6,12 @@
 
 (in-package :cl-alsa-midi)
 
-
-
 (cl:defconstant _SYS_POLL_H 1)
 
 (cffi:defcstruct pollfd
-	(fd :int)
-	(events :short)
-	(revents :short))
+  (fd :int)
+  (events :short)
+  (revents :short))
 
 (cffi:defcfun ("poll" poll) :int
   (__fds :pointer)
@@ -94,20 +92,20 @@
   (:SND_SEQ_EVENT_NONE #.255))
 
 (cffi:defcstruct snd_seq_addr_t
-	(client :unsigned-char)
-	(port :unsigned-char))
+  (client :unsigned-char)
+  (port :unsigned-char))
 
 (cffi:defcstruct snd_seq_connect_t
-	(sender (:struct snd_seq_addr_t))
-	(dest (:struct snd_seq_addr_t)))
+  (sender (:struct snd_seq_addr_t))
+  (dest (:struct snd_seq_addr_t)))
 
 (cffi:defcstruct snd_seq_real_time_t
-	(tv_sec :unsigned-int)
-	(tv_nsec :unsigned-int))
+  (tv_sec :unsigned-int)
+  (tv_nsec :unsigned-int))
 
 (cffi:defcunion snd_seq_timestamp_t
-	(tick :unsigned-int)
-	(time (:struct snd_seq_real_time_t)))
+  (tick :unsigned-int)
+  (time (:struct snd_seq_real_time_t)))
 
 (cl:defconstant SND_SEQ_TIME_STAMP_TICK (cl:ash 0 0))
 
@@ -136,71 +134,71 @@
 (cl:defconstant SND_SEQ_PRIORITY_MASK (cl:ash 1 4))
 
 (cffi:defcstruct snd_seq_ev_note_t
-	(channel :unsigned-char)
-	(note :unsigned-char)
-	(velocity :unsigned-char)
-	(off_velocity :unsigned-char)
-	(duration :unsigned-int))
+  (channel :unsigned-char)
+  (note :unsigned-char)
+  (velocity :unsigned-char)
+  (off_velocity :unsigned-char)
+  (duration :unsigned-int))
 
 (cffi:defcstruct snd_seq_ev_ctrl_t
-	(channel :unsigned-char)
-	(param :unsigned-int)
-	(value :int))
+  (channel :unsigned-char)
+  (param :unsigned-int)
+  (value :int))
 
 (cffi:defcstruct snd_seq_ev_raw8_t
-	(d :pointer))
+  (d :pointer))
 
 (cffi:defcstruct snd_seq_ev_raw32_t
-	(d :pointer))
+  (d :pointer))
 
 (cffi:defcstruct snd_seq_ev_ext_t
-	(len :unsigned-int)
-	(ptr :pointer))
+  (len :unsigned-int)
+  (ptr :pointer))
 
 (cffi:defcstruct snd_seq_result_t
-	(event :int)
-	(result :int))
+  (event :int)
+  (result :int))
 
 (cffi:defcstruct snd_seq_queue_skew_t
-	(value :unsigned-int)
-	(base :unsigned-int))
+  (value :unsigned-int)
+  (base :unsigned-int))
 
 (cffi:defcstruct snd_seq_ev_queue_control_t
-	(queue :unsigned-char)
-	(unused :pointer)
-	(param :pointer))
+  (queue :unsigned-char)
+  (unused :pointer)
+  (param :pointer))
 
 (cffi:defcunion snd_seq_ev_queue_control_param
-	(value :int)
-	(time (:union snd_seq_timestamp_t))
-	(position :unsigned-int)
-	(skew (:struct snd_seq_queue_skew_t))
-	(d32 :pointer)
-	(d8 :pointer))
+  (value :int)
+  (time (:union snd_seq_timestamp_t))
+  (position :unsigned-int)
+  (skew (:struct snd_seq_queue_skew_t))
+  (d32 :pointer)
+  (d8 :pointer))
 
 (cffi:defcunion snd_seq_event_data
-	(note (:struct snd_seq_ev_note_t))
-	(control (:struct snd_seq_ev_ctrl_t))
-	(raw8 (:struct snd_seq_ev_raw8_t))
-	(raw32 (:struct snd_seq_ev_raw32_t))
-	(ext (:struct snd_seq_ev_ext_t))
-	(queue (:struct snd_seq_ev_queue_control_t))
-	(time (:union snd_seq_timestamp_t))
-	;; (time :pointer)
-	(addr (:struct snd_seq_addr_t))
-	(connect (:struct snd_seq_connect_t))
-	(result  (:struct snd_seq_result_t)))
+  (note (:struct snd_seq_ev_note_t))
+  (control (:struct snd_seq_ev_ctrl_t))
+  (raw8 (:struct snd_seq_ev_raw8_t))
+  (raw32 (:struct snd_seq_ev_raw32_t))
+  (ext (:struct snd_seq_ev_ext_t))
+  (queue (:struct snd_seq_ev_queue_control_t))
+  (time (:union snd_seq_timestamp_t))
+  ;; (time :pointer)
+  (addr (:struct snd_seq_addr_t))
+  (connect (:struct snd_seq_connect_t))
+  (result  (:struct snd_seq_result_t)))
 
 (cffi:defcstruct snd_seq_event_t
-	(type :unsigned-char)
-	(flags :unsigned-char)
-	(tag :unsigned-char)
-	(queue :unsigned-char)
-	(time (:union snd_seq_timestamp_t))
-        (source (:struct snd_seq_addr_t))
-	(dest (:struct snd_seq_addr_t))
-	(data (:union snd_seq_event_data))
-        )
+  (type :unsigned-char)
+  (flags :unsigned-char)
+  (tag :unsigned-char)
+  (queue :unsigned-char)
+  (time (:union snd_seq_timestamp_t))
+  (source (:struct snd_seq_addr_t))
+  (dest (:struct snd_seq_addr_t))
+  (data (:union snd_seq_event_data))
+  )
 
 (cl:defconstant SND_SEQ_OPEN_OUTPUT 1)
 
@@ -211,9 +209,9 @@
 (cl:defconstant SND_SEQ_NONBLOCK #x0001)
 
 (cffi:defcenum snd_seq_type_t
-	:SND_SEQ_TYPE_HW
-	:SND_SEQ_TYPE_SHM
-	:SND_SEQ_TYPE_INET)
+  :SND_SEQ_TYPE_HW
+  :SND_SEQ_TYPE_SHM
+  :SND_SEQ_TYPE_INET)
 
 (cl:defconstant SND_SEQ_ADDRESS_UNKNOWN 253)
 
@@ -317,8 +315,8 @@
   (info :pointer))
 
 (cffi:defcenum snd_seq_client_type_t
-	(:SND_SEQ_USER_CLIENT #.1)
-	(:SND_SEQ_KERNEL_CLIENT #.2))
+  (:SND_SEQ_USER_CLIENT #.1)
+  (:SND_SEQ_KERNEL_CLIENT #.2))
 
 (cffi:defcfun ("snd_seq_client_info_sizeof" snd_seq_client_info_sizeof) :pointer)
 
@@ -712,8 +710,8 @@
   (sub :pointer))
 
 (cffi:defcenum snd_seq_query_subs_type_t
-	:SND_SEQ_QUERY_SUBS_READ
-	:SND_SEQ_QUERY_SUBS_WRITE)
+  :SND_SEQ_QUERY_SUBS_READ
+  :SND_SEQ_QUERY_SUBS_WRITE)
 
 (cffi:defcfun ("snd_seq_query_subscribe_sizeof" snd_seq_query_subscribe_sizeof) :pointer)
 
@@ -953,9 +951,9 @@
   (tempo :pointer))
 
 (cffi:defcenum snd_seq_queue_timer_type_t
-	(:SND_SEQ_TIMER_ALSA #.0)
-	(:SND_SEQ_TIMER_MIDI_CLOCK #.1)
-	(:SND_SEQ_TIMER_MIDI_TICK #.2))
+  (:SND_SEQ_TIMER_ALSA #.0)
+  (:SND_SEQ_TIMER_MIDI_CLOCK #.1)
+  (:SND_SEQ_TIMER_MIDI_TICK #.2))
 
 (cffi:defcfun ("snd_seq_queue_timer_sizeof" snd_seq_queue_timer_sizeof) :pointer)
 
@@ -1181,7 +1179,7 @@
 ;; 	SND_SEQ_EVFLG_QUEUE_VALUE)
 
 (cffi:defcvar ("snd_seq_event_types" snd_seq_event_types)
- :pointer)
+  :pointer)
 
 (cffi:defcfun ("snd_seq_control_queue" snd_seq_control_queue) :int
   (seq :pointer)

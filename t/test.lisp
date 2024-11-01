@@ -27,19 +27,19 @@
 ;;        (progn ,@body)))
 
 (test system-attributes
-      "Check that the system has all the standard attributes"
-      (let ((missing (system-missing-attributes '#:cl-alsa-midi)))
-        (is-false missing
-                  "The system definition is missing attributes: ~S" missing)))
+  "Check that the system has all the standard attributes"
+  (let ((missing (system-missing-attributes '#:cl-alsa-midi)))
+    (is-false missing
+              "The system definition is missing attributes: ~S" missing)))
 
 (test undocumented-symbols
-      "Check for any undocumented exported symbols"
-      (let ((undocumented (package-undocumented-symbols '#:cl-alsa-midi)))
-        (is-false undocumented
-                  "Some exported symbols do not have docstrings: ~S" undocumented)))
+  "Check for any undocumented exported symbols"
+  (let ((undocumented (package-undocumented-symbols '#:cl-alsa-midi)))
+    (is-false undocumented
+              "Some exported symbols do not have docstrings: ~S" undocumented)))
 
 (test docstrings-broken-links
-      "Check for any broken links in docstrings of exported symbols"
-      (let ((symbols (package-docstrings-with-broken-links '#:cl-alsa-midi)))
-        (is-false symbols
-                  "Some exported symbols have docstrings that contain broken links: ~S" symbols)))
+  "Check for any broken links in docstrings of exported symbols"
+  (let ((symbols (package-docstrings-with-broken-links '#:cl-alsa-midi)))
+    (is-false symbols
+              "Some exported symbols have docstrings that contain broken links: ~S" symbols)))
