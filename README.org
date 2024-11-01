@@ -1,14 +1,15 @@
 #+TITLE: cl-alsa-midi
+#+DESCRIPTION: A Common Lisp library for MIDI in Linux via ALSA.
 
 This is cl-alsa-midi, a Common Lisp library for MIDI in Linux via ALSA. With it, you can send and receive MIDI messages to and from any program or device that is supported by ALSA.
 
 Currently, this library is in the process of being refactored:
 
 - Remove extraneous/unneeded features.
-- Reduce dependencies.
+- Reduce dependencies - in particular ~optima~ and ~optima.extra~.
 - Improve/clean up the code style (remove unnecessary macros, fix indentation, etc).
 - Add more docstrings/documentation.
-- Simplify and stabilize the API.
+- Simplify and stabilize the API - integrate ~cl-alsa-midi/quick~ and ~midihelper~ into the main ~cl-alsa-midi~ package.
 - Add more tests.
 - Submit to Quicklisp (after most of the above is complete--in particular, API improvement/stabilization).
 
@@ -53,6 +54,44 @@ Note that in the future cl-alsa-midi's API will change and this example will sto
 
   (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-pgmchange *midi-channel* 2)) ; Send a program change message to switch to program #2.
 #+END_SRC
+
+To use cl-alsa-midi to trigger synths with [[https://github.com/byulparan/cl-collider][cl-collider]], you can do something like the following:
+
+# FIX: also add CC handling to this example?
+
+#+begin_src lisp
+  (ql:quickload '(:cl-alsa-midi :cl-collider)) ; Load the systems.
+
+  (defvar *midi-map-synths-playing* (make-hash-table)
+    "Hash table mapping MIDI note numbers to the synth/node that they triggered.")
+
+  (defparameter *midi-map-synth* 'default
+    "Name of the synth that should be triggered by incoming MIDI notes.")
+
+  ;; Define a basic handler function for MIDI input.
+  (defun midi-map (messages)
+    (dolist (message messages)
+      (let* ((event-type (getf message :event-type))
+             (event-data (getf message :event-data))
+             (source (car (getf message :source)))
+             (destination (car (getf message :dest))))
+        (declare (ignorable source destination))
+        (case event-type
+          (:snd_seq_event_noteon
+           (let ((note (getf event-data 'cl-alsa-midi::note)))
+             (setf (gethash note *midi-map-synths-playing*) (sc:synth *midi-map-synth* :freq (sc:midicps note)))))
+          (:snd_seq_event_noteoff
+           (let* ((note (getf event-data 'cl-alsa-midi::note))
+                  (synth (gethash note *midi-map-synths-playing*)))
+             (when synth
+               (sc:release synth)
+               (setf (gethash note *midi-map-synths-playing*) nil))))
+          (:snd_seq_event_controller nil)
+          (t event-type)))))
+
+  ;; Start the ALSA MIDI client with midi-map function as input handler.
+  (cl-alsa-midi/midihelper:midihelper-start :master 96 'midi-map)
+#+end_src
 
 * Similar
 
