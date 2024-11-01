@@ -43,3 +43,8 @@
   (let ((symbols (package-docstrings-with-broken-links '#:cl-alsa-midi)))
     (is-false symbols
               "Some exported symbols have docstrings that contain broken links: ~S" symbols)))
+
+(test check-for-aseqdump
+  "Check that aseqdump is available"
+  (finishes (uiop:run-program (list "aseqdump" "--version"))
+    "The aseqdump executable did not execute properly. Subsequent tests will fail unless it is installed and available."))
