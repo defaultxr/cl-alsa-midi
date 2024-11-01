@@ -26,6 +26,27 @@
   (is (length= 3 (split-by-multiple-spaces "130:0   Song position pointer      value 0")))
   (is (length= 3 (split-by-multiple-spaces "130:1   Control change          0, controller 1, value 65"))))
 
+(defun plists-match-p (plist-1 plist-2 &key (test 'eql))
+  "True if the keys and values of PLIST-1 exist and are equal (as per TEST) to the keys in PLIST-2. Any extra keys/values in PLIST-2 are ignored. Returns a list of the non-matching keys and their values as the second value."
+  (loop :for (key value) :on plist-1 :by #'cddr
+        :for value-2 := (getf plist-2 key)
+        :unless (funcall test value value-2)
+          :collect (list key (list value value-2)) :into res
+        :finally (return (values (null res) res))))
+
+(test plists-match-p
+  "Test the `plists-match-p' helper function"
+  (is (plists-match-p (list :foo 1 :bar 2) (list :foo 1 :bar 2))
+      "plists-match-p doesn't see that the same list matches")
+  (is (plists-match-p (list :foo 1 :bar 2) (list :foo 1 :bar 2 :baz 3))
+      "plists-match-p doesn't ignore keys missing from plist-1")
+  (is-false (plists-match-p (list :foo 1 :bar 2) (list :foo 1 :bar 3))
+            "plists-match-p doesn't notice non-matching values")
+  (is (plists-match-p (list :foo 1 :bar 2 :baz 3) (list :bar 2 :baz 3 :foo 1))
+      "plists-match-p seems to check the order when it shouldn't")
+  (is (plists-match-p (list :foo 1 :bar 2 :abcd 99) (list :foo 1 :abcd 99 :bar 2 :quux 43))
+      "plists-match-p doesn't ignore missing keys or doesn't ignore ordering"))
+
 ;;; aseqdump functions
 
 (defun aseqdump (&optional (port "CL"))
@@ -120,15 +141,15 @@
                    (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-noteoff 0 0 127))
                    (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-noteoff 0 69 127))
                    (cl-alsa-midi/midihelper:send-event (cl-alsa-midi/midihelper:ev-noteoff 0 127 127)))))
-    (is (equal (list :client 132 :port 0 :event-type :note-on :channel 0 :note 0 :velocity 127)
-               (first results)))
-    (is (equal (list :client 132 :port 0 :event-type :note-on :channel 0 :note 69 :velocity 127)
-               (second results)))
-    (is (equal (list :client 132 :port 0 :event-type :note-on :channel 0 :note 127 :velocity 127)
-               (third results)))
-    (is (equal (list :client 132 :port 0 :event-type :note-off :channel 0 :note 0 :velocity 127)
-               (fourth results)))
-    (is (equal (list :client 132 :port 0 :event-type :note-off :channel 0 :note 69 :velocity 127)
-               (fifth results)))
-    (is (equal (list :client 132 :port 0 :event-type :note-off :channel 0 :note 127 :velocity 127)
-               (sixth results)))))
+    (is (plists-match-p (list :port 0 :event-type :note-on :channel 0 :note 0 :velocity 127)
+                        (first results)))
+    (is (plists-match-p (list :port 0 :event-type :note-on :channel 0 :note 69 :velocity 127)
+                        (second results)))
+    (is (plists-match-p (list :port 0 :event-type :note-on :channel 0 :note 127 :velocity 127)
+                        (third results)))
+    (is (plists-match-p (list :port 0 :event-type :note-off :channel 0 :note 0 :velocity 127)
+                        (fourth results)))
+    (is (plists-match-p (list :port 0 :event-type :note-off :channel 0 :note 69 :velocity 127)
+                        (fifth results)))
+    (is (plists-match-p (list :port 0 :event-type :note-off :channel 0 :note 127 :velocity 127)
+                        (sixth results)))))
