@@ -19,7 +19,7 @@
            #:recv
            #:channel))
 
-(defpackage #:cl-alsa-midi.quick
+(defpackage #:cl-alsa-midi/quick
   (:use #:cl #:cl-alsa-midi)
   (:export #:send-note-on
            #:send-note-off

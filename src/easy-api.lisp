@@ -1,4 +1,4 @@
-(in-package :cl-alsa-midi.quick)
+(in-package :cl-alsa-midi/quick)
 
 (defmacro def-event-func (event args &body body)
   `(defun ,(intern (format nil "SEND-~A" event))
